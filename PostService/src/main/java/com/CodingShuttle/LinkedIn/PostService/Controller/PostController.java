@@ -18,7 +18,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<PostDto> createPost(@RequestBody PostCreateRequestDto postCreateRequestDto, HttpServletRequest httpServletRequest) {
         // Logic to create a post
         PostDto createdPost = postService.createPost(postCreateRequestDto, 1L); // Assuming userId is 1 for demonstration purposes
