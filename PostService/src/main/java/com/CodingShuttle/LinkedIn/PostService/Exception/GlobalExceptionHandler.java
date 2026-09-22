@@ -35,7 +35,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException exception) {
-        ApiError apiError = new ApiError("Post ID must be a valid number", HttpStatus.BAD_REQUEST);
+        String parameterName = exception.getName();
+        String message = "Path parameter must be a valid number";
+        if ("userId".equals(parameterName)) {
+            message = "User ID must be a valid number";
+        } else if ("postId".equals(parameterName)) {
+            message = "Post ID must be a valid number";
+        }
+        ApiError apiError = new ApiError(message, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
