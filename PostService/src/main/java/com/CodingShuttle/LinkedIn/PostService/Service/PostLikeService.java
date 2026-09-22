@@ -5,9 +5,9 @@ import com.CodingShuttle.LinkedIn.PostService.Exception.BadRequestException;
 import com.CodingShuttle.LinkedIn.PostService.Exception.ResourceNotFoundException;
 import com.CodingShuttle.LinkedIn.PostService.Repository.PostLikeRepository;
 import com.CodingShuttle.LinkedIn.PostService.Repository.PostRepository;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,6 +37,8 @@ public class PostLikeService {
         PostLike postLike = new PostLike();
         postLike.setUserId(userId);
         postLike.setPostId(postId);
+        postLikeRepository.save(postLike);
+        log.info("Post with ID {} liked successfully by user with ID {}", postId, userId);
     }
 
     private void validateIds(Long postId, Long userId) {
@@ -46,5 +48,24 @@ public class PostLikeService {
         if (userId == null || userId <= 0) {
             throw new BadRequestException("User ID must be greater than zero");
         }
+    }
+
+    public void unlikePost(Long postId, Long userId) {
+        validateIds(postId, userId);
+        log.info("User with ID {} is attempting to unlike post", userId);
+
+        boolean exists = postRepository.existsById(postId);
+        if (!exists) {
+            log.error("Post with ID {} not found for unliking", postId);
+            throw new ResourceNotFoundException("Post not found with ID: " + postId);
+        }
+
+        boolean alreadyLiked = postLikeRepository.existsByUserIdAndPostId(userId, postId);
+        if (!alreadyLiked) {
+            log.warn("User with ID {} has not liked post with ID {}", userId, postId);
+            throw new BadRequestException("User has not liked this post");
+        }
+
+        postLikeRepository.deleteByUserIdAndPostId(userId, postId);
     }
 }
