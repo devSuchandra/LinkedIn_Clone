@@ -5,23 +5,27 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/likes")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Validated
 public class LikesController {
 
     private final PostLikeService postLikeService;
 
-    @PostMapping("/{postId}")
+    @PostMapping("/likes/{postId}")
     public ResponseEntity<Void> likePost(
             @PathVariable @Positive(message = "Post ID must be greater than zero") Long postId) {
         postLikeService.likePost(postId, 1L); // Assuming userId is 1L for now
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/unlikes/{postId}")
+    public ResponseEntity<Void> unlikePost(
+            @PathVariable @Positive(message = "Post ID must be greater than zero") Long postId) {
+        postLikeService.unlikePost(postId, 1L); // Assuming userId is 1L for now
         return ResponseEntity.noContent().build();
     }
 
