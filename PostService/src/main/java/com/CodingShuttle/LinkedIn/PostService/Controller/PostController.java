@@ -5,15 +5,20 @@ import com.CodingShuttle.LinkedIn.PostService.DTO.PostDto;
 import com.CodingShuttle.LinkedIn.PostService.Entity.Post;
 import com.CodingShuttle.LinkedIn.PostService.Service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Validated
 public class PostController {
 
     private final PostService postService;
@@ -34,5 +39,12 @@ public class PostController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/users/{userId}/allPosts")
+    public ResponseEntity<List<PostDto>> getAllPostsOfUser(
+            @PathVariable @Positive(message = "User ID must be greater than zero") Long userId) {
+        List<PostDto> posts = postService.getAllPostsOfUser(userId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 }
