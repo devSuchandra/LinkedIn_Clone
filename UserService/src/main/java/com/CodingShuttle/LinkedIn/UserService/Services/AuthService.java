@@ -8,6 +8,7 @@ import com.CodingShuttle.LinkedIn.UserService.Repository.UserRepository;
 import com.CodingShuttle.LinkedIn.UserService.Utils.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class AuthService {
 
     public UserDto signUp(SignUpRequestDto signUpRequestDto) {
         String normalizedEmail = signUpRequestDto.getEmail().strip().toLowerCase(Locale.ROOT);
-        if (userRepository.existsByEmail(normalizedEmail)) {
+        if (emailExists(normalizedEmail)) {
             throw new DuplicateEmailException();
         }
 
@@ -37,11 +38,23 @@ public class AuthService {
         try {
             savedUser = userRepository.saveAndFlush(user);
         } catch (DataIntegrityViolationException exception) {
-            if (userRepository.existsByEmail(normalizedEmail)) {
+            if (emailExists(normalizedEmail)) {
                 throw new DuplicateEmailException();
             }
             throw exception;
+        } catch (RuntimeException exception) {
+            log.error("Failed to save user during signup", exception);
+            throw exception;
         }
         return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    private boolean emailExists(String email) {
+        try {
+            return userRepository.existsByEmail(email);
+        } catch (RuntimeException exception) {
+            log.error("Failed to check email during signup", exception);
+            throw exception;
+        }
     }
 }
