@@ -16,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +52,15 @@ public class AuthService {
 
     public String logIn(@Valid LogInRequestDto logInRequestDto) {
         String normalizedEmail = logInRequestDto.getEmail().strip().toLowerCase(Locale.ROOT);
-        User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+        Optional<User> userResult;
+        try {
+            userResult = userRepository.findByEmail(normalizedEmail);
+        } catch (RuntimeException exception) {
+            log.error("Failed to look up user during login", exception);
+            throw exception;
+        }
+        User user = userResult.orElseThrow(
+                () -> new BadCredentialsException("Invalid email or password"));
 
         boolean isPasswordValid = PasswordUtils.verifyPassword(logInRequestDto.getPassword(), user.getPassword());
 
