@@ -22,13 +22,25 @@ public class PostLikeService {
         validateIds(postId, userId);
         log.info("User with ID {} is attempting to like post", userId);
 
-        boolean exists = postRepository.existsById(postId);
+        boolean exists;
+        try {
+            exists = postRepository.existsById(postId);
+        } catch (RuntimeException exception) {
+            log.error("Failed to check whether post with ID {} exists while liking", postId, exception);
+            throw exception;
+        }
         if (!exists) {
             log.error("Post with ID {} not found for liking", postId);
             throw new ResourceNotFoundException("Post not found with ID: " + postId);
         }
 
-        boolean alreadyLiked = postLikeRepository.existsByUserIdAndPostId(userId, postId);
+        boolean alreadyLiked;
+        try {
+            alreadyLiked = postLikeRepository.existsByUserIdAndPostId(userId, postId);
+        } catch (RuntimeException exception) {
+            log.error("Failed to check whether user with ID {} liked post with ID {}", userId, postId, exception);
+            throw exception;
+        }
         if (alreadyLiked) {
             log.warn("User with ID {} has already liked post with ID {}", userId, postId);
             throw new BadRequestException("User has already liked this post");
