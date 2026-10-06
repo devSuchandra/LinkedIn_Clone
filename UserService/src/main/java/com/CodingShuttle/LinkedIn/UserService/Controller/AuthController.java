@@ -1,5 +1,6 @@
 package com.CodingShuttle.LinkedIn.UserService.Controller;
 
+import com.CodingShuttle.LinkedIn.UserService.DTO.LogInRequestDto;
 import com.CodingShuttle.LinkedIn.UserService.DTO.SignUpRequestDto;
 import com.CodingShuttle.LinkedIn.UserService.DTO.UserDto;
 import com.CodingShuttle.LinkedIn.UserService.Services.AuthService;
@@ -23,6 +24,12 @@ public class AuthController {
     public ResponseEntity<UserDto> signUp(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
         UserDto userDto = authService.signUp(signUpRequestDto);
         return new ResponseEntity<>(userDto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> logIn(@Valid @RequestBody LogInRequestDto logInRequestDto) {
+        String token = authService.logIn(logInRequestDto);
+        return ResponseEntity.ok(token);
     }
 
 

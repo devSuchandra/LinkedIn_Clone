@@ -10,4 +10,8 @@ public class PasswordUtils {
     public static boolean checkPassword(String plainTextPassword, String hashedPassword){
         return BCrypt.checkpw(plainTextPassword, hashedPassword);
     }
+
+    public static boolean verifyPassword(String password, String hashedPassword) {
+        return checkPassword(password, hashedPassword);
+    }
 }
